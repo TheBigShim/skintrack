@@ -1,0 +1,862 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#E7E1D3">
+<title>Skin Log</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%23E7E1D3'/%3E%3Ccircle cx='38' cy='42' r='26' fill='%234B6455'/%3E%3Ccircle cx='62' cy='60' r='26' fill='%23A6572E' fill-opacity='0.92'/%3E%3C/svg%3E">
+<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%23E7E1D3'/%3E%3Ccircle cx='38' cy='42' r='26' fill='%234B6455'/%3E%3Ccircle cx='62' cy='60' r='26' fill='%23A6572E' fill-opacity='0.92'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,450;9..144,600&family=Archivo:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --parchment:#E7E1D3;
+    --surface:#F5F2E9;
+    --ink:#2B2A25;
+    --ink-soft:#6B6558;
+    --line:#D8D1BE;
+    --taz:#4B6455;
+    --taz-soft:#DCE5DC;
+    --aze:#A6572E;
+    --aze-soft:#EFDDD0;
+    --skip:#B7AF9B;
+    --radius:18px;
+    --radius-sm:10px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--parchment);
+    color:var(--ink);
+    font-family:'Archivo',sans-serif;
+    -webkit-font-smoothing:antialiased;
+    min-height:100vh;
+    padding-bottom:48px;
+  }
+  a,button{font-family:inherit;}
+  button{cursor:pointer;}
+  button:disabled{cursor:default;}
+  button:focus-visible, a:focus-visible{
+    outline:2px solid var(--ink);
+    outline-offset:3px;
+  }
+  @media (prefers-reduced-motion: reduce){
+    *{animation:none !important; transition:none !important;}
+  }
+
+  .wrap{
+    max-width:520px;
+    margin:0 auto;
+    padding:28px 20px 0;
+  }
+
+  header.top{
+    display:flex;
+    align-items:baseline;
+    justify-content:space-between;
+    margin-bottom:22px;
+  }
+  header.top .date{
+    font-family:'Fraunces',serif;
+    font-weight:450;
+    font-size:26px;
+    letter-spacing:-0.01em;
+  }
+  header.top .date small{
+    display:block;
+    font-family:'Archivo',sans-serif;
+    font-size:12.5px;
+    color:var(--ink-soft);
+    font-weight:500;
+    margin-top:2px;
+  }
+
+  h2.section-title{
+    font-family:'Fraunces',serif;
+    font-weight:450;
+    font-size:15px;
+    color:var(--ink-soft);
+    margin:0 0 10px;
+    letter-spacing:0.01em;
+  }
+
+  .card{
+    background:var(--surface);
+    border-radius:var(--radius);
+    padding:18px 18px 16px;
+    margin-bottom:12px;
+    border-left:5px solid var(--product-color, var(--line));
+  }
+  .card .row{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+  }
+  .card .name{
+    font-family:'Fraunces',serif;
+    font-size:19px;
+    font-weight:450;
+  }
+  .card .status{
+    font-size:13px;
+    color:var(--ink-soft);
+    margin-top:2px;
+  }
+  .dot{
+    width:9px;height:9px;border-radius:50%;
+    display:inline-block;
+    background:var(--product-color);
+    margin-right:7px;
+    position:relative;
+    top:-1px;
+  }
+  .actions{
+    display:flex;
+    gap:8px;
+    margin-top:14px;
+  }
+  .btn{
+    flex:1;
+    border:1.5px solid var(--line);
+    background:transparent;
+    color:var(--ink);
+    padding:10px 8px;
+    border-radius:var(--radius-sm);
+    font-size:14px;
+    font-weight:600;
+    transition:background .15s ease, border-color .15s ease, color .15s ease;
+  }
+  .btn.applied.is-active{
+    background:var(--product-color);
+    border-color:var(--product-color);
+    color:#FBF9F3;
+  }
+  .btn.skipped.is-active{
+    background:var(--skip);
+    border-color:var(--skip);
+    color:#FBF9F3;
+  }
+  .btn:disabled{
+    opacity:.4;
+  }
+  .future-note{
+    font-size:12.5px;
+    color:var(--ink-soft);
+    margin-top:12px;
+    font-style:italic;
+  }
+
+  .streak-line{
+    font-size:12.5px;
+    color:var(--ink-soft);
+    margin-top:12px;
+    padding-top:12px;
+    border-top:1px solid var(--line);
+  }
+  .streak-line strong{
+    color:var(--ink);
+    font-weight:700;
+  }
+
+  /* Week strip / nav */
+  .nav-row{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    margin-bottom:2px;
+  }
+  .nav-row .section-title{ margin-bottom:0; }
+  .nav-btn{
+    background:none;
+    border:1.5px solid var(--line);
+    border-radius:8px;
+    width:30px;
+    height:30px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color:var(--ink);
+    font-size:15px;
+    line-height:1;
+  }
+  .nav-range{
+    font-size:12px;
+    color:var(--ink-soft);
+    font-weight:600;
+  }
+  .nav-controls{ display:flex; align-items:center; gap:8px; }
+
+  .week{
+    background:var(--surface);
+    border-radius:var(--radius);
+    padding:16px 18px;
+    margin-bottom:26px;
+  }
+  .week-grid{
+    display:grid;
+    grid-template-columns:repeat(7,1fr);
+    gap:4px;
+    margin-top:10px;
+  }
+  .week-day{
+    text-align:center;
+    background:none;
+    border:none;
+    padding:6px 2px;
+    border-radius:10px;
+  }
+  .week-day .dlabel{
+    font-size:11px;
+    color:var(--ink-soft);
+    margin-bottom:4px;
+    font-weight:600;
+  }
+  .week-day .dnum{
+    font-size:13px;
+    font-weight:700;
+    color:var(--ink);
+    margin-bottom:8px;
+  }
+  .week-day .pips{
+    display:flex;
+    flex-direction:column;
+    gap:5px;
+    align-items:center;
+  }
+  .pip{
+    width:11px;height:11px;
+    border-radius:50%;
+    border:1.5px solid var(--line);
+    background:transparent;
+  }
+  .pip.applied{ background:var(--pip-color); border-color:var(--pip-color); }
+  .pip.skipped{ background:var(--skip); border-color:var(--skip); }
+  .week-day.is-today .dnum{ color:var(--ink); text-decoration:underline; text-underline-offset:3px; }
+  .week-day.is-selected{ background:var(--parchment); }
+  .week-day.is-future{ opacity:.45; }
+
+  /* Weekly summary */
+  .summary-row{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:10px 0;
+    border-bottom:1px solid var(--line);
+  }
+  .summary-row:last-of-type{ border-bottom:none; }
+  .summary-name{
+    display:flex;
+    align-items:center;
+    font-size:14px;
+    font-weight:600;
+  }
+  .summary-count{
+    font-family:'Fraunces',serif;
+    font-size:20px;
+  }
+  .summary-count small{
+    font-family:'Archivo',sans-serif;
+    font-size:12px;
+    color:var(--ink-soft);
+    font-weight:500;
+  }
+  .bump{
+    font-size:12.5px;
+    padding:10px 12px;
+    border-radius:var(--radius-sm);
+    margin-top:10px;
+  }
+  .bump.taz{ background:var(--taz-soft); color:var(--ink); }
+  .bump.aze{ background:var(--aze-soft); color:var(--ink); }
+
+  /* Calendar */
+  .cal{
+    background:var(--surface);
+    border-radius:var(--radius);
+    padding:16px 18px;
+    margin-bottom:26px;
+  }
+  .cal-grid{
+    display:grid;
+    grid-template-columns:repeat(7,1fr);
+    gap:3px;
+    margin-top:10px;
+  }
+  .cal-dlabel{
+    text-align:center;
+    font-size:10.5px;
+    font-weight:700;
+    color:var(--ink-soft);
+    padding-bottom:6px;
+  }
+  .cal-cell{
+    aspect-ratio:1;
+    background:none;
+    border:none;
+    border-radius:8px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:3px;
+    padding:2px;
+  }
+  .cal-cell .cnum{
+    font-size:12px;
+    font-weight:600;
+  }
+  .cal-cell.is-today{ background:var(--parchment); }
+  .cal-cell.is-selected{ box-shadow:inset 0 0 0 1.5px var(--ink); }
+  .cal-cell.is-outside .cnum{ opacity:.3; }
+  .cal-dots{ display:flex; gap:3px; }
+  .cal-dot{ width:5px; height:5px; border-radius:50%; border:1px solid var(--line); background:transparent; }
+  .cal-dot.applied.taz{ background:var(--taz); border-color:var(--taz); }
+  .cal-dot.applied.aze{ background:var(--aze); border-color:var(--aze); }
+  .cal-dot.skipped{ background:var(--skip); border-color:var(--skip); }
+  .cal-legend{
+    display:flex;
+    gap:16px;
+    margin-top:14px;
+    padding-top:12px;
+    border-top:1px solid var(--line);
+    font-size:11.5px;
+    color:var(--ink-soft);
+  }
+  .cal-legend span{ display:flex; align-items:center; gap:5px; }
+
+  .history{
+    margin-bottom:8px;
+  }
+  .hist-row{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:12px 2px;
+    border-bottom:1px solid var(--line);
+  }
+  .hist-row:last-child{ border-bottom:none; }
+  .hist-date{
+    font-size:14px;
+    font-weight:600;
+  }
+  .hist-marks{
+    display:flex;
+    gap:14px;
+    font-size:12.5px;
+    color:var(--ink-soft);
+  }
+  .hist-marks span{ display:flex; align-items:center; }
+
+  .empty{
+    font-size:14px;
+    color:var(--ink-soft);
+    padding:18px 2px;
+    line-height:1.5;
+  }
+
+  .reset-wrap{
+    text-align:center;
+    margin-top:30px;
+  }
+  .reset-btn{
+    background:none;
+    border:none;
+    color:var(--ink-soft);
+    font-size:12.5px;
+    text-decoration:underline;
+    text-underline-offset:3px;
+    padding:8px;
+  }
+
+  .foot-note{
+    text-align:center;
+    font-size:11.5px;
+    color:var(--ink-soft);
+    margin-top:6px;
+    line-height:1.5;
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header class="top">
+    <div class="date" id="todayLabel">—<small id="todaySub"></small></div>
+  </header>
+
+  <div class="week">
+    <div class="nav-row">
+      <h2 class="section-title">Log a day</h2>
+      <div class="nav-controls">
+        <button class="nav-btn" id="prevWeek" aria-label="Previous week">‹</button>
+        <span class="nav-range" id="weekRange"></span>
+        <button class="nav-btn" id="nextWeek" aria-label="Next week">›</button>
+      </div>
+    </div>
+    <div class="week-grid" id="weekGrid"></div>
+  </div>
+
+  <h2 class="section-title" id="logForLabel">Today</h2>
+
+  <div class="card" style="--product-color:var(--taz)" data-product="tazarotene">
+    <div class="row">
+      <div>
+        <div class="name">Tazarotene</div>
+        <div class="status" data-status-for="tazarotene">Not logged yet</div>
+      </div>
+    </div>
+    <div class="actions">
+      <button class="btn applied" data-action="applied" data-product="tazarotene">Applied</button>
+      <button class="btn skipped" data-action="skipped" data-product="tazarotene">Skipped</button>
+    </div>
+    <div class="streak-line" data-streak-for="tazarotene"></div>
+  </div>
+
+  <div class="card" style="--product-color:var(--aze)" data-product="azelaic">
+    <div class="row">
+      <div>
+        <div class="name">Azelaic acid</div>
+        <div class="status" data-status-for="azelaic">Not logged yet</div>
+      </div>
+    </div>
+    <div class="actions">
+      <button class="btn applied" data-action="applied" data-product="azelaic">Applied</button>
+      <button class="btn skipped" data-action="skipped" data-product="azelaic">Skipped</button>
+    </div>
+    <div class="streak-line" data-streak-for="azelaic"></div>
+  </div>
+  <div class="future-note" id="futureNote" hidden>You can't log a day that hasn't happened yet.</div>
+
+  <div class="week" style="margin-top:22px;">
+    <h2 class="section-title">Weekly usage</h2>
+    <div id="summaryBody"></div>
+  </div>
+
+  <div class="cal">
+    <div class="nav-row">
+      <h2 class="section-title">Calendar</h2>
+      <div class="nav-controls">
+        <button class="nav-btn" id="prevMonth" aria-label="Previous month">‹</button>
+        <span class="nav-range" id="monthLabel"></span>
+        <button class="nav-btn" id="nextMonth" aria-label="Next month">›</button>
+      </div>
+    </div>
+    <div class="cal-grid" id="calGrid"></div>
+    <div class="cal-legend">
+      <span><span class="cal-dot applied taz"></span>Tazarotene</span>
+      <span><span class="cal-dot applied aze"></span>Azelaic acid</span>
+      <span><span class="cal-dot skipped"></span>Skipped</span>
+    </div>
+  </div>
+
+  <h2 class="section-title">Recent log</h2>
+  <div class="history card" id="historyList" style="border-left:5px solid var(--line);"></div>
+
+  <div class="reset-wrap">
+    <button class="reset-btn" id="resetBtn">Clear all data</button>
+    <div class="foot-note">Stored only on this phone, in this browser. Add this page to your home screen for one-tap access.</div>
+  </div>
+</div>
+
+<script>
+(function(){
+  var STORAGE_KEY = 'skinLogV1';
+  var PRODUCTS = ['tazarotene','azelaic'];
+  var PRODUCT_LABEL = { tazarotene:'Tazarotene', azelaic:'Azelaic acid' };
+
+  function loadState(){
+    try{
+      var raw = localStorage.getItem(STORAGE_KEY);
+      return raw ? JSON.parse(raw) : { entries: {} };
+    }catch(e){
+      return { entries: {} };
+    }
+  }
+  function saveState(state){
+    try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
+    catch(e){ /* storage unavailable — app still works for this session */ }
+  }
+
+  var state = loadState();
+
+  function pad(n){ return n < 10 ? '0'+n : ''+n; }
+  function keyFor(date){
+    return date.getFullYear() + '-' + pad(date.getMonth()+1) + '-' + pad(date.getDate());
+  }
+  function keyToDate(k){
+    var p = k.split('-').map(Number);
+    return new Date(p[0], p[1]-1, p[2]);
+  }
+  function startOfToday(){
+    var d = new Date();
+    d.setHours(0,0,0,0);
+    return d;
+  }
+  function mondayOf(date){
+    var offset = (date.getDay() + 6) % 7;
+    var m = new Date(date);
+    m.setDate(m.getDate() - offset);
+    return m;
+  }
+  function sameDay(a,b){ return keyFor(a) === keyFor(b); }
+  function addDays(date,n){ var d = new Date(date); d.setDate(d.getDate()+n); return d; }
+
+  var today = startOfToday();
+  var todayKey = keyFor(today);
+
+  var selectedDate = new Date(today);
+  var viewWeekStart = mondayOf(today);
+  var calendarMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+
+  function getEntry(dKey){
+    return state.entries[dKey] || {};
+  }
+  function setStatus(dKey, product, status){
+    var entry = state.entries[dKey] || {};
+    if(entry[product] === status){
+      delete entry[product];
+    } else {
+      entry[product] = status;
+    }
+    if(Object.keys(entry).length === 0){
+      delete state.entries[dKey];
+    } else {
+      state.entries[dKey] = entry;
+    }
+    saveState(state);
+    renderAll();
+  }
+
+  function selectDay(date){
+    if(date > today) return;
+    selectedDate = new Date(date);
+    viewWeekStart = mondayOf(selectedDate);
+    calendarMonth = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), 1);
+    renderAll();
+  }
+
+  function currentStreak(product){
+    var count = 0;
+    var cursor = new Date(today);
+    var entryToday = getEntry(todayKey)[product];
+    if(!entryToday){
+      cursor = addDays(cursor,-1);
+    }
+    while(true){
+      var k = keyFor(cursor);
+      var st = getEntry(k)[product];
+      if(st === 'applied'){
+        count++;
+        cursor = addDays(cursor,-1);
+      } else {
+        break;
+      }
+    }
+    return count;
+  }
+
+  function weekCount(weekStart, product){
+    var n = 0;
+    for(var i=0;i<7;i++){
+      var d = addDays(weekStart, i);
+      if(d > today) continue;
+      if(getEntry(keyFor(d))[product] === 'applied') n++;
+    }
+    return n;
+  }
+
+  function renderHeader(){
+    var todayLabel = document.getElementById('todayLabel');
+    var todaySub = document.getElementById('todaySub');
+    var fmt = new Intl.DateTimeFormat(undefined, { weekday:'short', month:'short', day:'numeric' });
+    todayLabel.firstChild.textContent = fmt.format(today) + ' ';
+    todaySub.textContent = 'Skin log';
+  }
+
+  function renderLogCard(){
+    var selKey = keyFor(selectedDate);
+    var isFuture = selectedDate > today;
+    var fmt = new Intl.DateTimeFormat(undefined, { weekday:'long', month:'short', day:'numeric' });
+    var logForLabel = document.getElementById('logForLabel');
+    logForLabel.textContent = sameDay(selectedDate, today) ? 'Today' : fmt.format(selectedDate);
+
+    document.getElementById('futureNote').hidden = !isFuture;
+
+    PRODUCTS.forEach(function(product){
+      var entry = getEntry(selKey);
+      var st = entry[product];
+      var statusEl = document.querySelector('[data-status-for="'+product+'"]');
+      var appliedBtn = document.querySelector('.btn.applied[data-product="'+product+'"]');
+      var skippedBtn = document.querySelector('.btn.skipped[data-product="'+product+'"]');
+
+      appliedBtn.classList.toggle('is-active', st === 'applied');
+      skippedBtn.classList.toggle('is-active', st === 'skipped');
+      appliedBtn.disabled = isFuture;
+      skippedBtn.disabled = isFuture;
+
+      var when = sameDay(selectedDate, today) ? 'today' : sameDay(selectedDate, addDays(today,-1)) ? 'yesterday' : 'that day';
+      if(st === 'applied') statusEl.textContent = 'Applied ' + when;
+      else if(st === 'skipped') statusEl.textContent = 'Skipped ' + when;
+      else statusEl.textContent = isFuture ? "Hasn't happened yet" : 'Not logged yet';
+
+      var streak = currentStreak(product);
+      var streakEl = document.querySelector('[data-streak-for="'+product+'"]');
+      streakEl.innerHTML = streak > 0
+        ? 'Current streak: <strong>' + streak + ' day' + (streak === 1 ? '' : 's') + '</strong>'
+        : 'No active streak yet';
+    });
+  }
+
+  function renderWeekStrip(){
+    var grid = document.getElementById('weekGrid');
+    grid.innerHTML = '';
+    var dayLabels = ['M','T','W','T','F','S','S'];
+    var weekEnd = addDays(viewWeekStart, 6);
+    var rangeFmt = new Intl.DateTimeFormat(undefined, { month:'short', day:'numeric' });
+    document.getElementById('weekRange').textContent =
+      sameDay(viewWeekStart, mondayOf(today)) ? 'This week' : rangeFmt.format(viewWeekStart) + '–' + rangeFmt.format(weekEnd);
+
+    for(var i=0;i<7;i++){
+      var d = addDays(viewWeekStart, i);
+      var isFuture = d > today;
+      var isToday = sameDay(d, today);
+      var isSelected = sameDay(d, selectedDate);
+      var entry = getEntry(keyFor(d));
+
+      var dayBtn = document.createElement('button');
+      dayBtn.className = 'week-day' +
+        (isToday ? ' is-today' : '') +
+        (isSelected ? ' is-selected' : '') +
+        (isFuture ? ' is-future' : '');
+      dayBtn.disabled = isFuture;
+
+      var label = document.createElement('div');
+      label.className = 'dlabel';
+      label.textContent = dayLabels[i];
+      dayBtn.appendChild(label);
+
+      var num = document.createElement('div');
+      num.className = 'dnum';
+      num.textContent = d.getDate();
+      dayBtn.appendChild(num);
+
+      var pips = document.createElement('div');
+      pips.className = 'pips';
+      PRODUCTS.forEach(function(product){
+        var pip = document.createElement('div');
+        var st = isFuture ? undefined : entry[product];
+        var colorVar = product === 'tazarotene' ? 'var(--taz)' : 'var(--aze)';
+        pip.className = 'pip' + (st ? ' ' + st : '');
+        pip.style.setProperty('--pip-color', colorVar);
+        pips.appendChild(pip);
+      });
+      dayBtn.appendChild(pips);
+
+      (function(dCopy){
+        dayBtn.addEventListener('click', function(){ selectDay(dCopy); });
+      })(d);
+
+      grid.appendChild(dayBtn);
+    }
+  }
+
+  function renderWeeklySummary(){
+    var body = document.getElementById('summaryBody');
+    var weekEnd = addDays(viewWeekStart, 6);
+    var prevWeekStart = addDays(viewWeekStart, -7);
+    var isComplete = weekEnd <= today;
+    var isCurrent = viewWeekStart.getTime() === mondayOf(today).getTime();
+
+    var html = '';
+    var bumpHtml = '';
+
+    PRODUCTS.forEach(function(product){
+      var count = weekCount(viewWeekStart, product);
+      var prevCount = weekCount(prevWeekStart, product);
+      var colorVar = product === 'tazarotene' ? 'var(--taz)' : 'var(--aze)';
+      var label = isCurrent && !isComplete ? 'so far' : 'this week';
+
+      var trend;
+      if(prevCount === 0 && count === 0){
+        trend = 'No uses logged yet';
+      } else if(prevCount === 0){
+        trend = 'First week logging this';
+      } else if(count > prevCount){
+        trend = '&uarr; up from ' + prevCount + ' last week';
+      } else if(count < prevCount){
+        trend = '&darr; down from ' + prevCount + ' last week';
+      } else {
+        trend = 'same as last week (' + prevCount + ')';
+      }
+
+      html += '<div class="summary-row">' +
+        '<div class="summary-name"><span class="dot" style="background:'+colorVar+'"></span>'+PRODUCT_LABEL[product]+'</div>' +
+        '<div style="text-align:right"><div class="summary-count">'+count+'<small> &times; '+label+'</small></div>' +
+        '<div style="font-size:11.5px;color:var(--ink-soft);margin-top:2px;">'+trend+'</div></div>' +
+        '</div>';
+
+      if(isComplete && prevCount > 0 && count > prevCount){
+        bumpHtml += '<div class="bump '+(product==='tazarotene'?'taz':'aze')+'">' +
+          'Looks like you upped your ' + PRODUCT_LABEL[product] + ' dosage this week — '+prevCount+'&times; last week to '+count+'&times; this week.</div>';
+      }
+    });
+
+    body.innerHTML = html + bumpHtml;
+  }
+
+  function renderCalendar(){
+    var grid = document.getElementById('calGrid');
+    grid.innerHTML = '';
+    var monthFmt = new Intl.DateTimeFormat(undefined, { month:'long', year:'numeric' });
+    document.getElementById('monthLabel').textContent = monthFmt.format(calendarMonth);
+
+    var dayLabels = ['M','T','W','T','F','S','S'];
+    dayLabels.forEach(function(l){
+      var el = document.createElement('div');
+      el.className = 'cal-dlabel';
+      el.textContent = l;
+      grid.appendChild(el);
+    });
+
+    var firstOfMonth = new Date(calendarMonth.getFullYear(), calendarMonth.getMonth(), 1);
+    var gridStart = mondayOf(firstOfMonth);
+    var lastOfMonth = new Date(calendarMonth.getFullYear(), calendarMonth.getMonth()+1, 0);
+    var gridEnd = mondayOf(lastOfMonth);
+    gridEnd = addDays(gridEnd, 6);
+    var totalDays = Math.round((gridEnd - gridStart) / 86400000) + 1;
+
+    for(var i=0;i<totalDays;i++){
+      var d = addDays(gridStart, i);
+      var isOutside = d.getMonth() !== calendarMonth.getMonth();
+      var isToday = sameDay(d, today);
+      var isSelected = sameDay(d, selectedDate);
+      var isFuture = d > today;
+      var entry = isFuture ? {} : getEntry(keyFor(d));
+
+      var cell = document.createElement('button');
+      cell.className = 'cal-cell' +
+        (isOutside ? ' is-outside' : '') +
+        (isToday ? ' is-today' : '') +
+        (isSelected ? ' is-selected' : '');
+      cell.disabled = isFuture;
+
+      var num = document.createElement('div');
+      num.className = 'cnum';
+      num.textContent = d.getDate();
+      cell.appendChild(num);
+
+      var dots = document.createElement('div');
+      dots.className = 'cal-dots';
+      PRODUCTS.forEach(function(product){
+        var st = entry[product];
+        if(!st) return;
+        var dot = document.createElement('span');
+        var cls = product === 'tazarotene' ? 'taz' : 'aze';
+        dot.className = 'cal-dot ' + (st === 'applied' ? 'applied ' + cls : 'skipped');
+        dots.appendChild(dot);
+      });
+      cell.appendChild(dots);
+
+      (function(dCopy, future){
+        cell.addEventListener('click', function(){ if(!future) selectDay(dCopy); });
+      })(d, isFuture);
+
+      grid.appendChild(cell);
+    }
+  }
+
+  function renderHistory(){
+    var list = document.getElementById('historyList');
+    var keys = Object.keys(state.entries).sort().reverse();
+    keys = keys.filter(function(k){ return k !== todayKey; }).slice(0, 90);
+
+    if(keys.length === 0){
+      list.innerHTML = '<div class="empty">Nothing logged yet before today. Once you mark tazarotene or azelaic acid, it\'ll show up here.</div>';
+      return;
+    }
+
+    var fmt = new Intl.DateTimeFormat(undefined, { weekday:'short', month:'short', day:'numeric' });
+    var yKey = keyFor(addDays(today,-1));
+
+    list.innerHTML = keys.map(function(k){
+      var entry = state.entries[k];
+      var d = keyToDate(k);
+      var label = k === yKey ? 'Yesterday' : fmt.format(d);
+
+      function markFor(product, dotColor){
+        var st = entry[product];
+        var text = st === 'applied' ? 'Applied' : st === 'skipped' ? 'Skipped' : '—';
+        var opacity = st ? '1' : '0.5';
+        return '<span style="opacity:'+opacity+'"><span class="dot" style="background:'+dotColor+'"></span>'+text+'</span>';
+      }
+
+      return '<div class="hist-row"><div class="hist-date">'+label+'</div>' +
+        '<div class="hist-marks">' +
+        markFor('tazarotene','#4B6455') +
+        markFor('azelaic','#A6572E') +
+        '</div></div>';
+    }).join('');
+  }
+
+  function renderAll(){
+    renderHeader();
+    renderLogCard();
+    renderWeekStrip();
+    renderWeeklySummary();
+    renderCalendar();
+    renderHistory();
+  }
+
+  document.querySelectorAll('.btn').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      var product = btn.getAttribute('data-product');
+      var action = btn.getAttribute('data-action');
+      setStatus(keyFor(selectedDate), product, action);
+    });
+  });
+
+  document.getElementById('prevWeek').addEventListener('click', function(){
+    viewWeekStart = addDays(viewWeekStart, -7);
+    selectedDate = viewWeekStart;
+    renderAll();
+  });
+  document.getElementById('nextWeek').addEventListener('click', function(){
+    var next = addDays(viewWeekStart, 7);
+    if(next > today) next = mondayOf(today);
+    viewWeekStart = next;
+    selectedDate = viewWeekStart > today ? today : viewWeekStart;
+    renderAll();
+  });
+  document.getElementById('prevMonth').addEventListener('click', function(){
+    calendarMonth = new Date(calendarMonth.getFullYear(), calendarMonth.getMonth()-1, 1);
+    renderCalendar();
+  });
+  document.getElementById('nextMonth').addEventListener('click', function(){
+    var next = new Date(calendarMonth.getFullYear(), calendarMonth.getMonth()+1, 1);
+    if(next.getFullYear() > today.getFullYear() || (next.getFullYear()===today.getFullYear() && next.getMonth() > today.getMonth())) return;
+    calendarMonth = next;
+    renderCalendar();
+  });
+
+  document.getElementById('resetBtn').addEventListener('click', function(){
+    if(confirm('Clear all logged skincare data on this phone? This can\'t be undone.')){
+      state = { entries: {} };
+      saveState(state);
+      selectedDate = new Date(today);
+      viewWeekStart = mondayOf(today);
+      calendarMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+      renderAll();
+    }
+  });
+
+  renderAll();
+})();
+</script>
+</body>
+</html>
